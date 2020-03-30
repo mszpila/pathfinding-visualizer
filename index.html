@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="cssTheme" rel="stylesheet" href="cssBasic.css"/>
+    <title>Pathfinding Visualiser</title>
+</head>
+<body>
+    <div class="navbarDiv">
+        <nav class="navbar">
+            <div class="navbarHeader">
+                <div class="title">Pathfinding Visualiser</div>
+            </div>
+            <div class="items">
+                <ul class="navbarItems">
+                    <!-- <li onclick="toggleDropdown('drop')" class="dropdown dropOk">
+                        <div class="button dropOk">Algorithms
+                        <span class="navbarArrow dropOk"></span></div>
+                            <ul id="drop" class="dropdownMenu">
+                                <a href="#"><li>D</li></a>
+                                <a href="#"><li>Bidirectional Swarm Algorithm</li></a>
+                                <a href="#"><li>D</li></a>
+                            </ul>
+                     -->
+                    <!-- <li onclick="toggleDropdown('drop2')" class="dropdown dropOk">
+                        <div class="button dropOk">Mazes & Patterns
+                        <span class="navbarArrow dropOk"></span></div>
+                            <ul id="drop2" class="dropdownMenu">
+                                <a href="#"><li>Recursive Division</li></a>
+                                <a href="#"><li>Recursive Division (vertical skew)</li></a>
+                                <a href="#"><li>Recursive Division (horizontal skew)</li></a>
+                            </ul> -->
+
+                    <!-- <li class="button">Add Bomb -->
+                    <li onclick="clearFunction(); runAStartAlgorithm()" class="button">Start
+                    <li onclick="clearBoard()" class="button">Clear Board
+                    <!-- <li class="button">Clear Walls & Weight -->
+                    <li onclick="clearFunction()" class="button">Clear Path
+                    <!-- <li onclick="toggleDropdown('drop3')" class="dropdown dropOk">
+                        <div class="button dropOk">Speed
+                        <span class="navbarArrow dropOk"></span></div>
+                            <ul id="drop3" class="dropdownMenu">
+                                <a href="#"><li>Fast</li></a>
+                                <a href="#"><li>Medium</li></a>
+                                <a href="#"><li>Slow</li></a>
+                            </ul>
+         -->
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="legendDiv">
+        <!-- <ul class="legend">
+            <li><div class="img startImage"></div>Start Node</li>
+            <li><div class="targetImage"></div>Target Node</li>
+            <li><div class="bombImage"></div>Bomb Node</li>
+            <li><div class="weightImage"></div>Weight Node</li>
+            <li><div class="unvisitedImage"></div>Unvisited Node</li>
+            <li><div class="visitedImage"></div>Visited Node</li>
+            <li><div class="pathImage"></div>Shortest-path Node</li>
+            <li><div class="wallImage"></div>Wall Node</li>
+        </ul> -->
+    </div>
+    <div class="description">
+        Build your maze and click Start
+    </div>
+    <table id="board"></table>
+</body>
+    <!-- toggle dropdown menu -->
+    <script>
+        // open & close dropdown menu
+        function toggleDropdown(element) {
+            let dropdowns = document.getElementsByClassName("dropdownMenu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.id === element) {
+                        continue;
+                    } else {
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
+                    }
+                }
+            document.getElementById(element).classList.toggle("show");
+        }
+        // Close the dropdown menu if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropOk')) {
+                let dropdowns = document.getElementsByClassName("dropdownMenu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- creating table & moving the cells -->
+    <script>
+
+        // setting the grid of the table
+        var rows =18;
+        var cols=50;
+
+        var table = document.getElementById('board');
+
+        // setting default positions for start and end
+        let start = ('10-7');
+        let end = ('10-42');
+        let walls = [];
+
+        // creating table
+        for (var r = 0; r<rows; r++) {
+            var row = table.insertRow(-1);
+            row.setAttribute('id', 'row '+ r)
+            for (var c = 0; c<cols; c++) {
+                var cell = row.insertCell(-1);
+                cell.setAttribute('id', r + '-' + c);
+                if (cell.id === (start)) {
+                    //cell.classList.toggle('start');
+                } else if (cell.id === (end)) {
+                    //cell.classList.toggle('end');
+                } else {
+                    cell.classList.toggle('unvisited');
+                }
+            }
+        }
+
+        document.getElementById(start).classList.toggle('start');
+        document.getElementById(end).classList.toggle('end');
+
+        // function to validate amount of elements in walls compared to amount of elements with wall class
+        // comment out this function, move the start on the wall's field and you will see why it is here
+        const validateWalls = () => {
+            
+            let wallElements = [];
+
+            for(i=0; i<walls.length; i++) {
+                wallElements.push(document.getElementById(walls[i]));
+            }
+
+            wallElements.forEach(element => {
+                if (element.className === 'unvisited' || element.className === 'visited') {
+                    document.getElementById(element.id).classList.remove('unvisited');
+                    document.getElementById(element.id).classList.remove('visited');
+                    document.getElementById(element.id).classList.add('wall');
+                }
+            })
+        }
+
+        // new moving
+        let isPressed = false;
+        let typeOfNode = '';
+
+        const addEvents = () => {
+            for (var r = 0; r<rows; r++) {
+                for (var c = 0; c<cols; c++) {
+                    let currentNode = document.getElementById(`${r}-${c}`);
+
+                    let yxOfCurrentNode;
+
+                    currentNode.onmousedown = (event) => {
+                        event.preventDefault();
+
+                        typeOfNode = event.target.className;
+
+                        if (event.target.classList.contains('unvisited')) {
+                            currentNode.classList.remove('unvisited');
+                            currentNode.classList.add('wall');
+                            if (!walls.includes(event.target.id)) {
+                                walls.push(event.target.id);
+                                // console.log(walls);
+                            }
+                        } else if (event.target.classList.contains('wall')) {
+                            currentNode.classList.remove('wall');
+                            currentNode.classList.add('unvisited');
+                            if (walls.includes(event.target.id)) {
+                                walls.splice(walls.indexOf(event.target.id), 1);
+                            }
+                        } else if (event.target.classList.contains('visited') && !event.target.classList.contains('start')) {
+                            currentNode.classList.remove(...currentNode.classList);
+                            currentNode.classList.add('wall');
+                            if (!walls.includes(event.target.id)) {
+                                walls.push(event.target.id);
+                                // console.log(walls);
+                            }
+                        }
+
+                        //yxOfCurrentNode = event.target.id;
+                        // console.log(yxOfCurrentNode);
+
+                        isPressed = true;
+                        // console.log(typeOfNode);
+                    };
+
+                    currentNode.onmouseup = (event) => {
+                        isPressed = false;
+                    };
+
+                    currentNode.onmouseleave = (event) => {
+                        if (isPressed) {
+                            let toDelete = document.getElementById(event.target.id);
+                            if (typeOfNode === 'start' || typeOfNode === 'start visited path') {
+                                toDelete.classList.remove('start');
+                                toDelete.classList.add('unvisited');
+
+                                validateWalls();
+
+
+
+                                // start = event.target.id;
+                            } else if (typeOfNode === 'end' || typeOfNode === 'end path') {
+                                toDelete.classList.remove('end');
+                                toDelete.classList.add('unvisited');
+
+                                validateWalls();
+                            }
+                            // yxOfCurrentNode = event.target.id;
+                            // console.log('leaving', event.target.id)
+                            // console.log(yxOfCurrentNode);
+                        }
+                    }
+
+                    currentNode.onmouseenter = (event) => {
+                        if (isPressed) {
+                            let node = document.getElementById(event.target.id);
+                            // let toDelete = document.getElementById(yxOfCurrentNode);
+                            // console.log(typeOfNode);
+                            if (typeOfNode === 'start' || typeOfNode === 'start visited path') {
+                                // console.log(yxOfCurrentNode);
+                                // console.log('entering', event.target.id)
+                                // console.log(toDelete);
+                                // toDelete.classList.remove('start');
+                                // toDelete.classList.add('unvisited');
+                                node.classList.remove('wall');
+                                node.classList.remove('unvisited');
+                                node.classList.add('start');
+                                start = event.target.id;
+
+                                
+                                if (algoClicked) {
+                                    clearFunction();
+                                    runAStartAlgorithm2();
+                                }
+                                validateWalls();
+                                // yxOfCurrentNode = event.target.id;
+                                // currentNode.onmouseleave = (toDelete) => {
+                                //     let rubbish = document.getElementById(toDelete.target.id);
+                                //     rubbish.classList.remove('start');
+                                // }
+                            } else if (typeOfNode === 'end' || typeOfNode === 'end path') {
+                                node.classList.remove('wall');
+                                node.classList.remove('unvisited');
+                                node.classList.add('end');
+                                end = event.target.id;
+
+                                // validateWalls();
+
+                                if (algoClicked) {
+                                    clearFunction();
+                                    runAStartAlgorithm2();
+                                }
+
+                                validateWalls();
+                            
+                            } else if (typeOfNode === 'unvisited' || typeOfNode === 'visited' || typeOfNode === 'visited path') {
+                                if (node.classList.contains('start') || node.classList.contains('end')) {
+                                    // do nothing
+                                } else {
+                                    // node.classList.remove('unvisited');
+                                    node.classList.remove(...node.classList);
+                                    node.classList.add('wall');
+
+                                    if (!walls.includes(event.target.id)) {
+                                        walls.push(event.target.id);
+                                        // console.log(walls);
+                                    }
+                                }
+                            } else if (typeOfNode === 'wall') {
+                                if (node.classList.contains('start') || node.classList.contains('end')) {
+                                    // do nothing
+                                } else {
+                                    node.classList.remove('wall');
+                                    node.classList.add('unvisited');
+                                    if (walls.includes(event.target.id)) {
+                                        walls.splice(walls.indexOf(event.target.id), 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        addEvents();
+        
+        // A* algorithm implementation
+
+        // distance between two points: current node and end node, without diagonal moving
+        const hFunction = (_nodeXY) => {
+            const nodeXY = _nodeXY.split('-');
+            const endXY = end.split('-');
+
+            return distance = Math.abs(nodeXY[0] - endXY[0]) + Math.abs(nodeXY[1] - endXY[1]);
+        };
+
+        // f function return overall score for node, this score determines whether it is the best option to choose or not
+        const fFunction = (_gFunction, _hFunction) => {
+            return _gFunction + _hFunction;
+        };
+
+        
+        // constructor for Node object
+        function Node(yx, previousNode, score, gScore, toEndScore, isWall, isWeighted) {
+            this.yx = yx; // .split('-');
+            this.previousNode = previousNode;
+            this.score = score;
+            this.gScore = gScore;
+            this.toEndScore = toEndScore
+            this.isWall = isWall;
+            this.isWeighted = isWeighted
+        }
+
+
+        let toVisit = []; // array of nodes that doesn't have calculated score, in the tutorial they are named open NOT CHANGING COLOR
+        let visited = []; // array of nodes with calculated score, in the tutorial they are named closed CHANGING COLOR
+        let path = [];
+        let currentNode; // the only the one node at the time from which the neighbours are calculated
+        let algoClicked = false;
+
+        const clearFunction = () => {
+
+            for (i=0; i<visited.length; i++) {
+                let element = document.getElementById(visited[i].yx);
+                if (element.classList.contains('visited') && !element.classList.contains('start')) {
+                    element.classList.remove('visited');
+                    element.classList.add('unvisited');
+                } else if (element.classList.contains('start')) {
+                    element.classList.remove('visited');
+                }
+                if (element.classList.contains('path')) {
+                    element.classList.remove('path');
+                }
+            }
+            toVisit = [];
+            visited = [];
+            path = [];
+            currentNode = [];
+            algoClicked = false;
+            reachedGoal = false;
+        }
+
+        const clearBoard = () => {
+            clearFunction();
+            for (i=0; i<walls.length; i++) {
+                let element = document.getElementById(walls[i]);
+                if (element.classList.contains('wall')) { // && !element.classList.contains('start')
+                    element.classList.remove('wall');
+                    element.classList.add('unvisited');
+                }
+            };
+            walls = [];
+            // walls.forEach(element => element.)
+        }
+        
+        // path
+        const creatingPath = (visited) => {
+            path.push(visited[visited.length-1].yx);
+            let previousNode = visited[visited.length-1].previousNode;
+            while (true) {
+                path.push(previousNode.yx);
+                previousNode = previousNode.previousNode;
+
+                if (previousNode === null) {
+                    break;
+                }
+            }
+            path.reverse();
+        };
+
+        const paintVisited = (visited) => {
+            for (i=0; i<visited.length; i++) {
+                // console.log(visited[i].previousNode);
+                const tableElement = (document.getElementById(visited[i].yx));
+                // console.log(tableElement);
+                setTimeout(() => {
+                    // new Promise(())
+                    if (tableElement.className === 'unvisited') {
+                        // console.log('over here!');
+                        tableElement.classList.remove('unvisited');
+                        tableElement.classList.add('visited');
+                    } else if (tableElement.className === 'start' || tableElement.className === 'unvisited end') {
+                        tableElement.classList.add('visited');
+                    }
+                    // paintPath(path);
+                }, 10 * i);
+            };
+        };
+
+        const paintPath = (path) => {
+            for (i=path.length-1; i>=0; i--) {
+            // for (i=0; i<path.length; i++) {
+                const pathElement = (document.getElementById(path[i]));
+                // console.log(pathElement);
+                setTimeout(() => {
+                    pathElement.classList.add('path');
+                }, 10 * i);
+            };
+        };
+
+        const printing = (visited, path) => {
+            for (i=0; i<=visited.length; i++) {
+                if (i === visited.length) {
+                    if (reachedGoal) {
+                        setTimeout(() => {
+                            paintPath(path);
+                        }, 10 * i);
+                        return;
+                    } else {
+                        return;
+                    }
+                }
+                // console.log(visited[i].previousNode);
+                const tableElement = (document.getElementById(visited[i].yx));
+                // console.log(tableElement);
+                setTimeout(() => {
+                    // new Promise(())
+                    if (tableElement.className === 'unvisited') {
+                        // console.log('over here!');
+                        tableElement.classList.remove('unvisited');
+                        tableElement.classList.add('visited');
+                    } else if (tableElement.className === 'start' || tableElement.className === 'unvisited end') {
+                        tableElement.classList.add('visited');
+                    }
+                    // paintPath(path);
+                }, 10 * i);
+            };
+        };
+
+        const instantPainting = (visited, path) => {
+            for (i=0; i<visited.length; i++) {
+                // if (i === visited.length) {
+                //     setTimeout(() => {
+                //         paintPath(path);
+                //     }, 10 * i);
+                //     return;
+                // }
+                // console.log(visited[i].previousNode);
+                const tableElement = (document.getElementById(visited[i].yx));
+                // console.log(tableElement);
+                // setTimeout(() => {
+                    // new Promise(())
+                if (tableElement.className === 'unvisited') {
+                    // console.log('over here!');
+                    tableElement.classList.remove('unvisited');
+                    tableElement.classList.add('visited');
+                } else if (tableElement.className === 'start' || tableElement.className === 'unvisited end') {
+                    tableElement.classList.add('visited');
+                }
+                    // paintPath(path);
+                // }, 10 * i);
+            };
+            if (reachedGoal) {
+                for (i=path.length-1; i>=0; i--) {
+                // for (i=0; i<path.length; i++) {
+                    const pathElement = (document.getElementById(path[i]));
+                    // console.log(pathElement);
+                    pathElement.classList.add('path');
+                };
+            }
+        };
+
+        const runAStartAlgorithm = () => {
+
+            algoClicked = true;
+
+            const startNode = new Node(start, null, fFunction(0, hFunction(start)), 0, hFunction(start), false, false);
+            
+            toVisit.push(startNode);
+
+            aStarAlgo();
+
+            creatingPath(visited);
+            printing(visited, path);
+            // instantPainting(visited, path);
+        }
+
+        const runAStartAlgorithm2 = () => {
+
+            algoClicked = true;
+
+            const startNode = new Node(start, null, fFunction(0, hFunction(start)), 0, hFunction(start), false, false);
+
+            toVisit.push(startNode);
+
+            aStarAlgo();
+
+            creatingPath(visited);
+            // printing(visited, path);
+            instantPainting(visited, path);
+            // console.log(al)
+            //console.log(visited);
+            //console.log(path);
+        }
+
+        const aStarAlgo = () => {
+            while (true) {
+
+                if (!toVisit.length) {
+                    break;
+                }
+
+                let nodeLowestScore = Infinity;
+
+                for (j=0; j<toVisit.length; j++) {
+                    if (toVisit[j].score < nodeLowestScore) {
+                        nodeLowestScore = toVisit[j].score;
+                    };
+                };
+
+                // using the lowest score to filter all nodes with that score to get the desired one
+                currentNode = toVisit.filter(element => {
+                    if (element.score === nodeLowestScore) {
+                        return element;
+                    }
+                });
+
+                // if more than one elements have the same score, choose the one with the lowest toEndScore (the clostest to the target)
+                if (currentNode.length > 1) {
+                    // getting the lowest end score
+                    let nodeLowestEndScore = Infinity;
+
+                    for (j=0; j<currentNode.length; j++) {
+                        if (currentNode[j].toEndScore < nodeLowestEndScore) {
+                            nodeLowestEndScore = currentNode[j].toEndScore;
+                        };
+                    };
+
+                    // using the lowest end score to filter all nodes with that score
+                    currentNode = currentNode.filter(element => {
+                        if (element.toEndScore === nodeLowestEndScore) {
+                            return element;
+                        }
+                    });
+                }
+
+                let nodeToDelete = toVisit.findIndex(element => { 
+                    if (element.yx === currentNode[0].yx) {
+                        return element;
+                    };
+                });
+
+                toVisit.splice(nodeToDelete, 1);
+
+                visited.push(currentNode[0]);
+
+                if (currentNode[0].yx === end) {
+                    reachedGoal = true;
+                    break;
+                };
+
+                let coordinates = currentNode[0].yx.split("-");
+                let x = parseInt(coordinates[1]);
+                let y = parseInt(coordinates[0]);
+                let neighbours = [];
+
+                if (document.getElementById(`${y}-${x+1}`)) {
+                    neighbours.push(`${y}-${x+1}`);
+                };
+
+                if (document.getElementById(`${y}-${x-1}`)) {
+                    neighbours.push(`${y}-${x-1}`);
+                };
+
+                if (document.getElementById(`${y+1}-${x}`)) {
+                    neighbours.push(`${y+1}-${x}`);
+                };
+
+                if (document.getElementById(`${y-1}-${x}`)) {
+                    neighbours.push(`${y-1}-${x}`);
+                };
+
+                for (j=0; j<neighbours.length; j++) {
+                    let alreadyUsed = visited.filter(element => {
+                        if (element.yx === neighbours[j]) {
+                            return element;
+                        };
+                    });
+
+                    if (document.getElementById(neighbours[j]).className === 'wall' || alreadyUsed.length) {
+                        continue;
+                    };
+
+                    let nodeToAdd = toVisit.filter(element => element.yx === neighbours[j]);
+
+                    if (!nodeToAdd.length) {
+                        const neighbour = new Node(neighbours[j], currentNode[0], fFunction(currentNode[0].gScore+1, hFunction(neighbours[j])), currentNode[0].gScore+1, hFunction(neighbours[j]), false, false);
+                        toVisit.push(neighbour);
+
+                    } else {
+                        let indexSearched = toVisit.findIndex(element => element.yx === neighbours[j]);
+
+                        let foundGScore = toVisit[indexSearched].gScore;
+
+                        let vsScore = fFunction(currentNode[0].gScore+1, hFunction(neighbours[j]));
+
+                        let vsGScore = currentNode[0].gScore+1;
+
+                        const history = toVisit[indexSearched].previousNode;
+
+                        if (vsGScore < foundGScore) {
+                            toVisit[indexSearched].previousNode = currentNode[0];
+                            toVisit[indexSearched].score = vsScore;
+                            toVisit[indexSearched].gScore = vsGScore;
+                        }
+                    }
+                };
+            }
+        };
+
+    </script>
+</html>
