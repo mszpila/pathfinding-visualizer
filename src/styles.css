@@ -61,6 +61,11 @@ ul {
 
 .button {
     padding: 15px 20px;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
 }
 
 .dropdownMenu {
@@ -127,7 +132,7 @@ ul {
 .startImage {
     display: inline-block;
     position: relative;
-    background-image: url(images/triangletwo-right.svg);
+    background-image: url(/images/triangletwo-right.svg);
     width: 25px;
     height: 25px;
     top: 0.35em;
@@ -139,7 +144,7 @@ ul {
 .targetImage {
     display: inline-block;
     position: relative;
-    background-image: url(images/circle.svg);
+    background-image: url(/images/circle.svg);
     width: 25px;
     height: 25px;
     top: 0.35em;
@@ -151,7 +156,7 @@ ul {
 .bombImage {
     display: inline-block;
     position: relative;
-    background-image: url(images/diamond.svg);
+    background-image: url(/images/diamond.svg);
     width: 25px;
     height: 25px;
     top: 0.35em;
@@ -163,7 +168,7 @@ ul {
 .weightImage {
     display: inline-block;
     position: relative;
-    background-image: url(images/weight.svg);
+    background-image: url(/images/weight.svg);
     width: 25px;
     height: 25px;
     top: 0.35em;
@@ -287,12 +292,12 @@ td {
 
 .start {
     /* background-color: #1d1d1d; */
-    background-image: url(images/triangletwo-right.svg);
+    background-image: url(/images/triangletwo-right.svg);
 }
 
 .end {
     /* background-color: red; */
-    background-image: url(images/circle.svg);
+    background-image: url(/images/circle.svg);
 }
 
 .wall {
