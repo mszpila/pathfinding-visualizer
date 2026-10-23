@@ -33,7 +33,14 @@
                             </ul> -->
 
                     <!-- <li class="button">Add Bomb -->
-                    <li onclick="clearFunction(); runAStartAlgorithm()" class="button">Start
+                    <li onclick="clearFunction(); runAlgorithm()" class="button">Start
+                    <li onclick="toggleDropdown('drop')" class="dropdown dropOk">
+                        <div id="algoName" class="button dropOk">A* <span class="navbarArrow dropOk"></span></div>
+                            <ul id="drop" class="dropdownMenu">
+                                <a href="#"><li onclick="selectAlgorithm('astar', 'A*')">A*</li></a>
+                                <a href="#"><li onclick="selectAlgorithm('dijkstra', 'Dijkstra\'s')">Dijkstra's</li></a>
+                                <a href="#"><li onclick="selectAlgorithm('thetastar', 'Theta*')">Theta*</li></a>
+                            </ul>
                     <li onclick="clearBoard()" class="button">Clear Board
                     <!-- <li class="button">Clear Walls & Weight -->
                     <li onclick="clearFunction()" class="button">Clear Path
@@ -242,7 +249,7 @@
                                 
                                 if (algoClicked) {
                                     clearFunction();
-                                    runAStartAlgorithm2();
+                                    runAlgorithm2();
                                 }
                                 validateWalls();
                                 // yxOfCurrentNode = event.target.id;
@@ -260,7 +267,7 @@
 
                                 if (algoClicked) {
                                     clearFunction();
-                                    runAStartAlgorithm2();
+                                    runAlgorithm2();
                                 }
 
                                 validateWalls();
@@ -616,6 +623,296 @@
                             toVisit[indexSearched].score = vsScore;
                             toVisit[indexSearched].gScore = vsGScore;
                         }
+                    }
+                };
+            }
+        };
+
+        let selectedAlgorithm = 'astar';
+
+        const selectAlgorithm = (name, label) => {
+            selectedAlgorithm = name;
+            document.getElementById('algoName').innerHTML = label + ' <span class="navbarArrow dropOk"></span>';
+            clearFunction();
+        };
+
+        const runAlgorithm = () => {
+            if (selectedAlgorithm === 'dijkstra') {
+                runDijkstraAlgorithm();
+            } else if (selectedAlgorithm === 'thetastar') {
+                runThetaStarAlgorithm();
+            } else {
+                runAStartAlgorithm();
+            }
+        };
+
+        const runAlgorithm2 = () => {
+            if (selectedAlgorithm === 'dijkstra') {
+                runDijkstraAlgorithm2();
+            } else if (selectedAlgorithm === 'thetastar') {
+                runThetaStarAlgorithm2();
+            } else {
+                runAStartAlgorithm2();
+            }
+        };
+
+        const getNeighbours = (yx) => {
+            let coordinates = yx.split("-");
+            let x = parseInt(coordinates[1]);
+            let y = parseInt(coordinates[0]);
+            let neighbours = [];
+
+            if (document.getElementById(`${y}-${x+1}`)) {
+                neighbours.push(`${y}-${x+1}`);
+            };
+
+            if (document.getElementById(`${y}-${x-1}`)) {
+                neighbours.push(`${y}-${x-1}`);
+            };
+
+            if (document.getElementById(`${y+1}-${x}`)) {
+                neighbours.push(`${y+1}-${x}`);
+            };
+
+            if (document.getElementById(`${y-1}-${x}`)) {
+                neighbours.push(`${y-1}-${x}`);
+            };
+
+            return neighbours;
+        };
+
+        const runDijkstraAlgorithm = () => {
+
+            algoClicked = true;
+
+            const startNode = new Node(start, null, 0, 0, 0, false, false);
+
+            toVisit.push(startNode);
+
+            dijkstraAlgo();
+
+            creatingPath(visited);
+            printing(visited, path);
+        }
+
+        const runDijkstraAlgorithm2 = () => {
+
+            algoClicked = true;
+
+            const startNode = new Node(start, null, 0, 0, 0, false, false);
+
+            toVisit.push(startNode);
+
+            dijkstraAlgo();
+
+            creatingPath(visited);
+            instantPainting(visited, path);
+        }
+
+        const dijkstraAlgo = () => {
+            while (true) {
+
+                if (!toVisit.length) {
+                    break;
+                }
+
+                let lowestIndex = 0;
+
+                for (let k=1; k<toVisit.length; k++) {
+                    if (toVisit[k].gScore < toVisit[lowestIndex].gScore) {
+                        lowestIndex = k;
+                    }
+                }
+
+                currentNode = toVisit.splice(lowestIndex, 1);
+
+                visited.push(currentNode[0]);
+
+                if (currentNode[0].yx === end) {
+                    reachedGoal = true;
+                    break;
+                };
+
+                let neighbours = getNeighbours(currentNode[0].yx);
+
+                for (let k=0; k<neighbours.length; k++) {
+                    let alreadyUsed = visited.some(element => element.yx === neighbours[k]);
+
+                    if (document.getElementById(neighbours[k]).className === 'wall' || alreadyUsed) {
+                        continue;
+                    };
+
+                    let indexSearched = toVisit.findIndex(element => element.yx === neighbours[k]);
+                    let vsGScore = currentNode[0].gScore+1;
+
+                    if (indexSearched === -1) {
+                        toVisit.push(new Node(neighbours[k], currentNode[0], vsGScore, vsGScore, 0, false, false));
+                    } else if (vsGScore < toVisit[indexSearched].gScore) {
+                        toVisit[indexSearched].previousNode = currentNode[0];
+                        toVisit[indexSearched].score = vsGScore;
+                        toVisit[indexSearched].gScore = vsGScore;
+                    }
+                };
+            }
+        };
+
+        const euclidean = (_a, _b) => {
+            const a = _a.split('-');
+            const b = _b.split('-');
+
+            return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+        };
+
+        const lineCells = (_a, _b) => {
+            const a = _a.split('-');
+            const b = _b.split('-');
+            let y0 = parseInt(a[0]);
+            let x0 = parseInt(a[1]);
+            const y1 = parseInt(b[0]);
+            const x1 = parseInt(b[1]);
+            const dx = Math.abs(x1 - x0);
+            const dy = -Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1;
+            const sy = y0 < y1 ? 1 : -1;
+            let err = dx + dy;
+            let cells = [`${y0}-${x0}`];
+
+            while (x0 !== x1 || y0 !== y1) {
+                const e2 = 2 * err;
+                if (e2 >= dy) {
+                    err += dy;
+                    x0 += sx;
+                }
+                if (e2 <= dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+                cells.push(`${y0}-${x0}`);
+            }
+
+            return cells;
+        };
+
+        const isWallCell = (yx) => {
+            return document.getElementById(yx).classList.contains('wall');
+        };
+
+        const lineOfSight = (a, b) => {
+            const cells = lineCells(a, b);
+
+            for (let k=0; k<cells.length; k++) {
+                if (isWallCell(cells[k])) {
+                    return false;
+                }
+                if (k > 0) {
+                    const previous = cells[k-1].split('-');
+                    const current = cells[k].split('-');
+                    if (previous[0] !== current[0] && previous[1] !== current[1]) {
+                        if (isWallCell(`${previous[0]}-${current[1]}`) || isWallCell(`${current[0]}-${previous[1]}`)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        };
+
+        const fillThetaPath = () => {
+            if (path.length < 2) {
+                return;
+            }
+
+            let fullPath = [path[0]];
+
+            for (let k=0; k<path.length-1; k++) {
+                fullPath = fullPath.concat(lineCells(path[k], path[k+1]).slice(1));
+            }
+
+            path = fullPath;
+        };
+
+        const runThetaStarAlgorithm = () => {
+
+            algoClicked = true;
+
+            const startNode = new Node(start, null, euclidean(start, end), 0, euclidean(start, end), false, false);
+
+            toVisit.push(startNode);
+
+            thetaStarAlgo();
+
+            creatingPath(visited);
+            fillThetaPath();
+            printing(visited, path);
+        }
+
+        const runThetaStarAlgorithm2 = () => {
+
+            algoClicked = true;
+
+            const startNode = new Node(start, null, euclidean(start, end), 0, euclidean(start, end), false, false);
+
+            toVisit.push(startNode);
+
+            thetaStarAlgo();
+
+            creatingPath(visited);
+            fillThetaPath();
+            instantPainting(visited, path);
+        }
+
+        const thetaStarAlgo = () => {
+            while (true) {
+
+                if (!toVisit.length) {
+                    break;
+                }
+
+                let lowestIndex = 0;
+
+                for (let k=1; k<toVisit.length; k++) {
+                    if (toVisit[k].score < toVisit[lowestIndex].score || (toVisit[k].score === toVisit[lowestIndex].score && toVisit[k].toEndScore < toVisit[lowestIndex].toEndScore)) {
+                        lowestIndex = k;
+                    }
+                }
+
+                currentNode = toVisit.splice(lowestIndex, 1);
+
+                visited.push(currentNode[0]);
+
+                if (currentNode[0].yx === end) {
+                    reachedGoal = true;
+                    break;
+                };
+
+                let neighbours = getNeighbours(currentNode[0].yx);
+
+                for (let k=0; k<neighbours.length; k++) {
+                    let alreadyUsed = visited.some(element => element.yx === neighbours[k]);
+
+                    if (document.getElementById(neighbours[k]).className === 'wall' || alreadyUsed) {
+                        continue;
+                    };
+
+                    let parent = currentNode[0];
+                    let vsGScore = currentNode[0].gScore + 1;
+                    const grandParent = currentNode[0].previousNode;
+
+                    if (grandParent && lineOfSight(grandParent.yx, neighbours[k])) {
+                        parent = grandParent;
+                        vsGScore = grandParent.gScore + euclidean(grandParent.yx, neighbours[k]);
+                    }
+
+                    let toEnd = euclidean(neighbours[k], end);
+                    let indexSearched = toVisit.findIndex(element => element.yx === neighbours[k]);
+
+                    if (indexSearched === -1) {
+                        toVisit.push(new Node(neighbours[k], parent, fFunction(vsGScore, toEnd), vsGScore, toEnd, false, false));
+                    } else if (vsGScore < toVisit[indexSearched].gScore) {
+                        toVisit[indexSearched].previousNode = parent;
+                        toVisit[indexSearched].score = fFunction(vsGScore, toEnd);
+                        toVisit[indexSearched].gScore = vsGScore;
                     }
                 };
             }
