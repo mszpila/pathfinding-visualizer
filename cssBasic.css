@@ -1,7 +1,36 @@
+:root {
+    --bg: white;
+    --text: #1d1d1d;
+    --nav-bg: #1d1d1d;
+    --nav-text: white;
+    --nav-hover: rgb(64, 64, 66);
+    --grid-border: rgb(175, 216, 248);
+    --cell-bg: white;
+    --visited: rgb(0, 190, 218);
+    --path: #FFFE6A;
+    --wall: #0C3547;
+}
+
+:root[data-theme="dark"] {
+    --bg: #121212;
+    --text: #e6e6e6;
+    --nav-bg: #000;
+    --nav-text: white;
+    --nav-hover: #2a2a2a;
+    --grid-border: #2f3d4a;
+    --cell-bg: #1b1f24;
+    --visited: #00869a;
+    --path: #e6d84a;
+    --wall: #6b8fa3;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: Roboto;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color .2s;
 }
 
 ul {
@@ -11,8 +40,8 @@ ul {
 }
 
 .navbarDiv {
-    background-color: #1d1d1d;
-    color: white;
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
     margin: 0;
     padding: 0;
 }
@@ -51,7 +80,7 @@ ul {
 
 .navbarItems>li:hover {
     /* float: left; */
-    background-color: rgb(64, 64, 66);
+    background-color: var(--nav-hover);
 }
 
 .dropdown {
@@ -66,7 +95,7 @@ ul {
 .dropdownMenu {
     display: none;
     position: absolute;
-    background-color: #1d1d1d;
+    background-color: var(--nav-bg);
     /* min-width: 160px; */
     padding: 5px;
     border-radius: 0px 0px 4px 4px;
@@ -75,7 +104,7 @@ ul {
 
 .dropdownMenu a {
     text-decoration: none;
-    color: white;
+    color: var(--nav-text);
 }
 
 .dropdownMenu li {
@@ -84,7 +113,7 @@ ul {
 }
 
 .dropdownMenu li:hover {
-    background-color: #FFFE6A;
+    background-color: var(--path);
 }
 
 .show {
@@ -96,7 +125,7 @@ ul {
     vertical-align: middle; 
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 5px solid white;
+    border-top: 5px solid var(--nav-text);
 }
 
 
@@ -182,7 +211,7 @@ ul {
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 0.42em; */
-    border: 1px solid rgb(175, 216, 248);
+    border: 1px solid var(--grid-border);
 }
 
 .unvisitedImage {
@@ -195,8 +224,8 @@ ul {
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 0.42em;
-    border: 1px solid rgb(175, 216, 248);
-    background-color:white
+    border: 1px solid var(--grid-border);
+    background-color: var(--cell-bg);
 }
 
 .visitedImage {
@@ -209,8 +238,8 @@ ul {
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 0.42em;
-    border: 1px solid rgb(175, 216, 248);
-    background-color: rgb(0, 190, 218);
+    border: 1px solid var(--grid-border);
+    background-color: var(--visited);
 }
 
 .pathImage {
@@ -223,8 +252,8 @@ ul {
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 0.42em;
-    border: 1px solid #FFFE6A;
-    background-color: #FFFE6A;
+    border: 1px solid var(--path);
+    background-color: var(--path);
 }
 
 .wallImage {
@@ -237,8 +266,8 @@ ul {
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 0.42em;
-    border: 1px solid #0C3547;
-    background-color: #0C3547;
+    border: 1px solid var(--wall);
+    background-color: var(--wall);
 }
 
 .description {
@@ -278,8 +307,9 @@ table {
 td {
     width: 25px;
     height: 25px;
-    border: 1px solid rgb(175, 216, 248);
+    border: 1px solid var(--grid-border);
     padding: 0;
+    background-color: var(--cell-bg);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -296,14 +326,14 @@ td {
 }
 
 .wall {
-    background-color: #0C3547;
-    border-color: #0C3547;
+    background-color: var(--wall);
+    border-color: var(--wall);
 }
 
 .visited {
-    background-color: rgb(0, 190, 218);
+    background-color: var(--visited);
 }
 
 .path {
-    background-color: #FFFE6A;
+    background-color: var(--path);
 }

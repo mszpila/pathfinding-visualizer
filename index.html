@@ -17,6 +17,7 @@
                     <li onclick="clearFunction(); runAStartAlgorithm()" class="button">Start
                     <li onclick="clearBoard()" class="button">Clear Board
                     <li onclick="clearFunction()" class="button">Clear Path
+                    <li onclick="toggleTheme()" class="button" id="themeToggle">Dark
                 </ul>
             </div>
         </nav>
@@ -29,6 +30,32 @@
     <table id="board"></table>
 </body>
     <script>
+        const THEME_KEY = 'theme';
+
+        function applyTheme(theme) {
+            document.documentElement.dataset.theme = theme;
+            document.getElementById('themeToggle').textContent = theme === 'dark' ? 'Light' : 'Dark';
+        }
+
+        function toggleTheme() {
+            const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            applyTheme(theme);
+            try {
+                localStorage.setItem(THEME_KEY, theme);
+            } catch (e) {}
+        }
+
+        function initTheme() {
+            let saved = null;
+            try {
+                saved = localStorage.getItem(THEME_KEY);
+            } catch (e) {}
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+        }
+
+        initTheme();
+
         function toggleDropdown(element) {
             for (const dropdown of document.getElementsByClassName('dropdownMenu')) {
                 if (dropdown.id !== element) {
