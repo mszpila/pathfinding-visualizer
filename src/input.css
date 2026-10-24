@@ -1,0 +1,42 @@
+@import "tailwindcss" source(none);
+@source "../index.html";
+
+@theme {
+  --font-sans: Roboto, ui-sans-serif, system-ui, sans-serif;
+  --color-nav: #1d1d1d;
+  --color-nav-hover: rgb(64 64 66);
+  --color-grid: rgb(175 216 248);
+  --color-visited: rgb(0 190 218);
+  --color-path: #fffe6a;
+  --color-wall: #0c3547;
+}
+
+@layer components {
+  .dropdownMenu.show {
+    @apply block;
+  }
+
+  #board td {
+    @apply size-[25px] p-0 border border-grid bg-center bg-no-repeat bg-contain;
+  }
+
+  #board .start {
+    @apply bg-[url(./images/triangletwo-right.svg)];
+  }
+
+  #board .end {
+    @apply bg-[url(./images/circle.svg)];
+  }
+
+  #board .wall {
+    @apply bg-wall border-wall;
+  }
+
+  #board .visited {
+    @apply bg-visited;
+  }
+
+  #board .path {
+    @apply bg-path;
+  }
+}
