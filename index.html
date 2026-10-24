@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link id="cssTheme" rel="stylesheet" href="cssBasic.css"/>
-    <title>Pathfinding Visualiser</title>
+    <title>Pathfinding Visualiser with A* algorithm</title>
 </head>
 <body>
     <div class="navbarDiv">
@@ -242,7 +242,7 @@
                                 
                                 if (algoClicked) {
                                     clearFunction();
-                                    runAStartAlgorithm2();
+                                    startAlgorithm();
                                 }
                                 validateWalls();
                                 // yxOfCurrentNode = event.target.id;
@@ -260,7 +260,7 @@
 
                                 if (algoClicked) {
                                     clearFunction();
-                                    runAStartAlgorithm2();
+                                    startAlgorithm();
                                 }
 
                                 validateWalls();
@@ -488,23 +488,34 @@
             // instantPainting(visited, path);
         }
 
-        const runAStartAlgorithm2 = () => {
+        const startAlgorithm = (instant = false) => {
+          algoClicked = true;
 
-            algoClicked = true;
+          const h = hFunction(start);
+          const startNode = new Node(
+            start,
+            null,
+            fFunction(0, h),
+            0,
+            h,
+            false,
+            false
+          );
 
-            const startNode = new Node(start, null, fFunction(0, hFunction(start)), 0, hFunction(start), false, false);
+          toVisit.push(startNode);
 
-            toVisit.push(startNode);
+          aStarAlgo();
 
-            aStarAlgo();
-
+          if (reachedGoal) {
             creatingPath(visited);
-            // printing(visited, path);
+          }
+
+          if (instant) {
             instantPainting(visited, path);
-            // console.log(al)
-            //console.log(visited);
-            //console.log(path);
-        }
+          } else {
+            printing(visited, path);
+          }
+        };
 
         const aStarAlgo = () => {
             while (true) {
