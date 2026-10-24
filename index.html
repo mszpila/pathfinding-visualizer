@@ -6,66 +6,66 @@
     <link id="cssTheme" rel="stylesheet" href="cssBasic.css"/>
     <title>Pathfinding Visualiser with A* algorithm</title>
 </head>
-<body>
-    <div class="navbarDiv">
-        <nav class="navbar">
-            <div class="navbarHeader">
-                <div class="title">Pathfinding Visualiser</div>
+<body class="font-sans">
+    <div class="bg-nav text-white">
+        <nav class="flex justify-center items-center">
+            <div class="px-5 py-2.5 text-xl font-light">
+                <div class="inline-block">Pathfinding Visualiser</div>
             </div>
-            <div class="items">
-                <ul class="navbarItems">
-                    <!-- <li onclick="toggleDropdown('drop')" class="dropdown dropOk">
-                        <div class="button dropOk">Algorithms
-                        <span class="navbarArrow dropOk"></span></div>
-                            <ul id="drop" class="dropdownMenu">
-                                <a href="#"><li>D</li></a>
-                                <a href="#"><li>Bidirectional Swarm Algorithm</li></a>
-                                <a href="#"><li>D</li></a>
+            <div class="inline-block">
+                <ul class="m-0">
+                    <!-- <li onclick="toggleDropdown('drop')" class="dropOk inline cursor-pointer hover:bg-nav-hover">
+                        <div class="dropOk inline-block px-5 py-[15px]">Algorithms
+                        <span class="dropOk inline-block align-middle border-x-[5px] border-x-transparent border-t-[5px] border-t-white"></span></div>
+                            <ul id="drop" class="dropdownMenu hidden absolute bg-nav p-[5px] rounded-b z-10">
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">D</li></a>
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Bidirectional Swarm Algorithm</li></a>
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">D</li></a>
                             </ul>
                      -->
-                    <!-- <li onclick="toggleDropdown('drop2')" class="dropdown dropOk">
-                        <div class="button dropOk">Mazes & Patterns
-                        <span class="navbarArrow dropOk"></span></div>
-                            <ul id="drop2" class="dropdownMenu">
-                                <a href="#"><li>Recursive Division</li></a>
-                                <a href="#"><li>Recursive Division (vertical skew)</li></a>
-                                <a href="#"><li>Recursive Division (horizontal skew)</li></a>
+                    <!-- <li onclick="toggleDropdown('drop2')" class="dropOk inline cursor-pointer hover:bg-nav-hover">
+                        <div class="dropOk inline-block px-5 py-[15px]">Mazes & Patterns
+                        <span class="dropOk inline-block align-middle border-x-[5px] border-x-transparent border-t-[5px] border-t-white"></span></div>
+                            <ul id="drop2" class="dropdownMenu hidden absolute bg-nav p-[5px] rounded-b z-10">
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Recursive Division</li></a>
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Recursive Division (vertical skew)</li></a>
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Recursive Division (horizontal skew)</li></a>
                             </ul> -->
 
-                    <!-- <li class="button">Add Bomb -->
-                    <li onclick="clearFunction(); runAStartAlgorithm()" class="button">Start
-                    <li onclick="clearBoard()" class="button">Clear Board
-                    <!-- <li class="button">Clear Walls & Weight -->
-                    <li onclick="clearFunction()" class="button">Clear Path
-                    <!-- <li onclick="toggleDropdown('drop3')" class="dropdown dropOk">
-                        <div class="button dropOk">Speed
-                        <span class="navbarArrow dropOk"></span></div>
-                            <ul id="drop3" class="dropdownMenu">
-                                <a href="#"><li>Fast</li></a>
-                                <a href="#"><li>Medium</li></a>
-                                <a href="#"><li>Slow</li></a>
+                    <!-- <li class="inline-block cursor-pointer px-5 py-[15px] hover:bg-nav-hover">Add Bomb -->
+                    <li onclick="clearFunction(); runAStartAlgorithm()" class="inline-block cursor-pointer px-5 py-[15px] hover:bg-nav-hover">Start
+                    <li onclick="clearBoard()" class="inline-block cursor-pointer px-5 py-[15px] hover:bg-nav-hover">Clear Board
+                    <!-- <li class="inline-block cursor-pointer px-5 py-[15px] hover:bg-nav-hover">Clear Walls & Weight -->
+                    <li onclick="clearFunction()" class="inline-block cursor-pointer px-5 py-[15px] hover:bg-nav-hover">Clear Path
+                    <!-- <li onclick="toggleDropdown('drop3')" class="dropOk inline cursor-pointer hover:bg-nav-hover">
+                        <div class="dropOk inline-block px-5 py-[15px]">Speed
+                        <span class="dropOk inline-block align-middle border-x-[5px] border-x-transparent border-t-[5px] border-t-white"></span></div>
+                            <ul id="drop3" class="dropdownMenu hidden absolute bg-nav p-[5px] rounded-b z-10">
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Fast</li></a>
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Medium</li></a>
+                                <a href="#" class="text-white no-underline"><li class="block p-[5px] hover:bg-path">Slow</li></a>
                             </ul>
          -->
                 </ul>
             </div>
         </nav>
     </div>
-    <div class="legendDiv">
-        <!-- <ul class="legend">
-            <li><div class="img startImage"></div>Start Node</li>
-            <li><div class="targetImage"></div>Target Node</li>
-            <li><div class="bombImage"></div>Bomb Node</li>
-            <li><div class="weightImage"></div>Weight Node</li>
-            <li><div class="unvisitedImage"></div>Unvisited Node</li>
-            <li><div class="visitedImage"></div>Visited Node</li>
-            <li><div class="pathImage"></div>Shortest-path Node</li>
-            <li><div class="wallImage"></div>Wall Node</li>
+    <div class="flex justify-evenly">
+        <!-- <ul class="inline-block px-10 py-2.5">
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] bg-center bg-no-repeat bg-[url(./images/triangletwo-right.svg)]"></div>Start Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] bg-center bg-no-repeat bg-[url(./images/circle.svg)]"></div>Target Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] bg-center bg-no-repeat bg-[url(./images/diamond.svg)]"></div>Bomb Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] bg-center bg-no-repeat bg-[url(./images/weight.svg)]"></div>Weight Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] border border-grid bg-white"></div>Unvisited Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] border border-grid bg-visited"></div>Visited Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] border border-path bg-path"></div>Shortest-path Node</li>
+            <li class="inline-block px-5 py-[15px]"><div class="inline-block relative top-[0.35em] size-[25px] mx-[0.42em] border border-wall bg-wall"></div>Wall Node</li>
         </ul> -->
     </div>
-    <div class="description">
+    <div class="flex justify-center px-[25px] py-[15px] font-bold">
         Build your maze and click Start
     </div>
-    <table id="board"></table>
+    <table id="board" class="mx-5 my-2.5"></table>
 </body>
     <!-- toggle dropdown menu -->
     <script>

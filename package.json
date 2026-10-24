@@ -1,0 +1,13 @@
+{
+  "name": "pathfinding-visualizer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./cssBasic.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./cssBasic.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
