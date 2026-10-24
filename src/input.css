@@ -32,6 +32,10 @@
     @apply bg-wall border-wall;
   }
 
+  #board .weighted {
+    @apply bg-[url(./images/weight.svg)];
+  }
+
   #board .visited {
     @apply bg-visited;
   }

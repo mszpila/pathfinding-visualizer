@@ -300,6 +300,10 @@ td {
     border-color: #0C3547;
 }
 
+.weighted {
+    background-image: url(./images/weight.svg);
+}
+
 .visited {
     background-color: rgb(0, 190, 218);
 }

@@ -50,14 +50,17 @@
         const ROWS = 18;
         const COLS = 50;
         const STEP_MS = 10;
+        const WEIGHT = 15;
 
         let start = '10-7';
         let end = '10-42';
         let walls = [];
+        let weights = [];
 
         let isPressed = false;
         let typeOfNode = '';
         let algoClicked = false;
+        let wKeyPressed = false;
 
         let visited = [];
         let path = [];
@@ -73,19 +76,19 @@
             return Math.abs(y1 - y2) + Math.abs(x1 - x2);
         };
 
-        function Node(yx, previousNode, score, gScore, toEndScore, isWall, isWeighted) {
+        function Node(yx, previousNode, score, gScore, toEndScore, isWall, weight) {
             this.yx = yx;
             this.previousNode = previousNode;
             this.score = score;
             this.gScore = gScore;
             this.toEndScore = toEndScore;
             this.isWall = isWall;
-            this.isWeighted = isWeighted;
+            this.weight = weight;
         }
 
-        const createNode = (yx, previousNode, gScore, target) => {
+        const createNode = (yx, previousNode, gScore, target, weight = 1) => {
             const h = heuristic(yx, target);
-            return new Node(yx, previousNode, gScore + h, gScore, h, false, false);
+            return new Node(yx, previousNode, gScore + h, gScore, h, false, weight);
         };
 
         const getNeighbours = (id, rows, cols) => {
@@ -110,7 +113,7 @@
             return result.reverse();
         };
 
-        const aStar = ({ start, end, rows, cols, isWall }) => {
+        const aStar = ({ start, end, rows, cols, isWall, getWeight }) => {
             const toVisit = [createNode(start, null, 0, end)];
             const closed = [];
 
@@ -128,11 +131,12 @@
                         continue;
                     }
 
-                    const gScore = current.gScore + 1;
+                    const weight = getWeight(neighbourId);
+                    const gScore = current.gScore + weight;
                     const existing = toVisit.find(node => node.yx === neighbourId);
 
                     if (!existing) {
-                        toVisit.push(createNode(neighbourId, current, gScore, end));
+                        toVisit.push(createNode(neighbourId, current, gScore, end, weight));
                     } else if (gScore < existing.gScore) {
                         existing.previousNode = current;
                         existing.gScore = gScore;
@@ -163,14 +167,16 @@
             getCell(end).classList.add('end');
         };
 
-        const isWallCell = (id) => getCell(id).className === 'wall';
+        const isWallCell = (id) => getCell(id).classList.contains('wall');
+
+        const getCellWeight = (id) => getCell(id).classList.contains('weighted') ? WEIGHT : 1;
 
         const paintVisitedCell = (id) => {
             const cell = getCell(id);
             if (cell.className === 'unvisited') {
                 cell.classList.remove('unvisited');
                 cell.classList.add('visited');
-            } else if (cell.className === 'start' || cell.className === 'unvisited end') {
+            } else if (cell.className === 'start' || cell.className === 'unvisited end' || cell.className === 'weighted') {
                 cell.classList.add('visited');
             }
         };
@@ -204,12 +210,23 @@
             });
         };
 
+        const validateWeights = () => {
+            weights.map(getCell).forEach(cell => {
+                if (!isStartOrEnd(cell) && !cell.classList.contains('weighted')) {
+                    cell.classList.remove('unvisited');
+                    cell.classList.add('weighted');
+                }
+            });
+        };
+
         const clearFunction = () => {
             visited.forEach(node => {
                 const cell = getCell(node.yx);
                 if (cell.classList.contains('visited') && !cell.classList.contains('start')) {
                     cell.classList.remove('visited');
-                    cell.classList.add('unvisited');
+                    if (!cell.classList.contains('weighted')) {
+                        cell.classList.add('unvisited');
+                    }
                 } else if (cell.classList.contains('start')) {
                     cell.classList.remove('visited');
                 }
@@ -230,11 +247,18 @@
                 }
             });
             walls = [];
+            weights.map(getCell).forEach(cell => {
+                if (cell.classList.contains('weighted')) {
+                    cell.classList.remove('weighted');
+                    cell.classList.add('unvisited');
+                }
+            });
+            weights = [];
         };
 
         const startAlgorithm = (instant = false) => {
             algoClicked = true;
-            ({ visited, path, reachedGoal } = aStar({ start, end, rows: ROWS, cols: COLS, isWall: isWallCell }));
+            ({ visited, path, reachedGoal } = aStar({ start, end, rows: ROWS, cols: COLS, isWall: isWallCell, getWeight: getCellWeight }));
             if (instant) {
                 drawResult(visited, path, reachedGoal);
             } else {
@@ -256,6 +280,25 @@
             }
         };
 
+        const addWeight = (id) => {
+            if (!weights.includes(id)) {
+                weights.push(id);
+            }
+        };
+
+        const removeWeight = (id) => {
+            if (weights.includes(id)) {
+                weights.splice(weights.indexOf(id), 1);
+            }
+        };
+
+        const setWeighted = (cell) => {
+            cell.classList.remove('wall', 'unvisited');
+            cell.classList.add('weighted');
+            removeWall(cell.id);
+            addWeight(cell.id);
+        };
+
         const isDraggingStart = () => typeOfNode === 'start' || typeOfNode === 'start visited path';
 
         const isDraggingEnd = () => typeOfNode === 'end' || typeOfNode === 'end path';
@@ -267,7 +310,18 @@
             const cell = event.currentTarget;
             typeOfNode = cell.className;
 
-            if (cell.classList.contains('unvisited')) {
+            if (wKeyPressed && !isStartOrEnd(cell)) {
+                typeOfNode = 'weight';
+                if (cell.classList.contains('weighted')) {
+                    cell.classList.remove('weighted');
+                    if (!cell.classList.contains('visited')) {
+                        cell.classList.add('unvisited');
+                    }
+                    removeWeight(cell.id);
+                } else {
+                    setWeighted(cell);
+                }
+            } else if (cell.classList.contains('unvisited')) {
                 cell.classList.remove('unvisited');
                 cell.classList.add('wall');
                 addWall(cell.id);
@@ -276,9 +330,17 @@
                 cell.classList.add('unvisited');
                 removeWall(cell.id);
             } else if (cell.classList.contains('visited') && !cell.classList.contains('start')) {
+                typeOfNode = 'visited';
                 cell.classList.remove(...cell.classList);
                 cell.classList.add('wall');
                 addWall(cell.id);
+                removeWeight(cell.id);
+            } else if (cell.classList.contains('weighted')) {
+                typeOfNode = 'unvisited';
+                cell.classList.remove('weighted');
+                cell.classList.add('wall');
+                addWall(cell.id);
+                removeWeight(cell.id);
             }
 
             isPressed = true;
@@ -298,11 +360,12 @@
                 cell.classList.remove(marker);
                 cell.classList.add('unvisited');
                 validateWalls();
+                validateWeights();
             }
         };
 
         const moveMarker = (cell, marker) => {
-            cell.classList.remove('wall', 'unvisited');
+            cell.classList.remove('wall', 'unvisited', 'weighted');
             cell.classList.add(marker);
             if (marker === 'start') {
                 start = cell.id;
@@ -314,6 +377,7 @@
                 startAlgorithm();
             }
             validateWalls();
+            validateWeights();
         };
 
         const onMouseEnter = (event) => {
@@ -326,11 +390,16 @@
                 moveMarker(cell, 'start');
             } else if (isDraggingEnd()) {
                 moveMarker(cell, 'end');
+            } else if (typeOfNode === 'weight') {
+                if (!isStartOrEnd(cell)) {
+                    setWeighted(cell);
+                }
             } else if (['unvisited', 'visited', 'visited path'].includes(typeOfNode)) {
                 if (!isStartOrEnd(cell)) {
                     cell.classList.remove(...cell.classList);
                     cell.classList.add('wall');
                     addWall(cell.id);
+                    removeWeight(cell.id);
                 }
             } else if (typeOfNode === 'wall') {
                 if (!isStartOrEnd(cell)) {
@@ -352,6 +421,18 @@
                 }
             }
         };
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key.toLowerCase() === 'w') {
+                wKeyPressed = true;
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.key.toLowerCase() === 'w') {
+                wKeyPressed = false;
+            }
+        });
 
         createBoard();
         addEvents();
